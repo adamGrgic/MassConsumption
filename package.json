@@ -1,0 +1,25 @@
+{
+  "name": "goth-todo",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bunx sass --watch --load-path=node_modules src/styles/main.scss public/styles/main.css",
+    "build": "bunx sass --load-path=node_modules src/styles/main.scss public/styles/main.css --style=compressed && bunx postcss public/css/main.css -o public/css/main.css --config postcss.config.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.0",
+    "sass": "^1.86.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/clean-css": "^4.2.11",
+    "bootstrap": "^5.3.3",
+    "clean-css-cli": "^5.6.3",
+    "htmx.org": "^1.9.12"
+  }
+}

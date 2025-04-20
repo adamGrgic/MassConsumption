@@ -1,0 +1,11 @@
+{
+  "css:layout": "public/styles/layout.2dbe517e.css",
+  "css:login": "public/styles/login.4c865d2b.css",
+  "htmx.min": "public/scripts/htmx/htmx.min.7e9c374d.js",
+  "js:forms": "public/scripts/bun/forms.36c66817.js",
+  "js:login": "public/scripts/bun/login.58ff4a9f.js",
+  "js:todo": "public/scripts/bun/todo.3ee6107b.js",
+  "response-targets": "public/scripts/htmx/response-targets.52c8a3be.js",
+  "css:dashboard": "public/styles/dashboard.d41d8cd9.css",
+  "js:nav": "public/scripts/bun/nav.945fdf8e.js"
+}

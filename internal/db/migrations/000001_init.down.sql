@@ -1,0 +1,10 @@
+DROP TRIGGER IF EXISTS set_updated_at_tasks ON taskitem;
+DROP TRIGGER IF EXISTS set_updated_at_users ON users;
+DROP TRIGGER IF EXISTS set_updated_at_accounts ON accounts;
+DROP TRIGGER IF EXISTS set_updated_at_tasklist ON tasklist;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS taskitem;
+DROP TABLE IF EXISTS tasklist;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS status;
+DROP FUNCTION IF EXISTS update_updated_at_column;

@@ -1,0 +1,60 @@
+package login_vc
+
+import "goth-todo/internal/media"
+
+import( 
+	"github.com/gin-gonic/gin"
+	"goth-todo/internal/middleware"	
+)
+
+type Model struct {
+	Context *gin.Context
+	Username string
+	ErrorMsg string
+}
+
+templ HTML( model Model ) {
+	<div id="login-gateway">
+		<div class="login-wrapper">
+			<div class="">
+				<h3>Goth Stack Todo Application</h3>
+			</div>
+			<div>
+				<form hx-post="/user/login" 
+					hx-target="#login-gateway"
+					hx-swap="outerHTML">
+					<div class="input-group">
+						<div class="input-wrapper">
+							<label for="exampleInputEmail1" class="form-label">Email address</label>
+							<input name="email" value={model.Username} type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="example@domain.com" required>
+						</div>
+						<div class="input-wrapper">
+							<label for="exampleInputPassword1" class="form-label">Password</label>
+							<input name="password" type="password" class="form-control" id="exampleInputPassword1" required>
+						</div>
+					</div>
+					
+					<div class="action-btn-container">
+						<button class="btn-login">Login</button>
+						<button class="btn-register">Register</button>
+					</div>
+
+				</form>
+			</div>
+			if model.ErrorMsg != "" {
+				<div class="text-danger text-center">
+					{ model.ErrorMsg }
+				</div>
+			}
+		</div>
+		
+		
+	</div>
+
+	<link rel="stylesheet" 
+		href={ media.GetCSSFile("login")} 
+		nonce={middleware.GetCssNonce(model.Context)} 
+		hx-swap-oob="true">
+	</link>
+	
+}
