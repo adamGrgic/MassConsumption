@@ -1,4 +1,4 @@
-# goth-todo
+# web-scraper
 
 To install dependencies:
 

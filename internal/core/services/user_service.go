@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 	"fmt"
-	"goth-todo/internal/core/models"
-	"goth-todo/internal/core/repository"
+	"web-scraper/internal/core/models"
+	"web-scraper/internal/core/repository"
 )
 
 type UserService interface {

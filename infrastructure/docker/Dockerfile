@@ -25,7 +25,7 @@ RUN bun install && bun add tailwindcss
 RUN bunx tailwindcss -i ./client/src/main.css -o ./static/css/styles.css
 
 # Build the Go application
-RUN go build -ldflags="-s -w" -o goth-todo main.go
+RUN go build -ldflags="-s -w" -o web-scraper main.go
 
 # Runtime stage (smaller final image)
 FROM ubuntu:22.04
@@ -35,7 +35,7 @@ WORKDIR /root/
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 
 # Copy the compiled Go binary
-COPY --from=build /app/goth-todo .
+COPY --from=build /app/web-scraper .
 
 # Copy static assets (Tailwind CSS, JS, etc.)
 COPY --from=build /app/static ./static
@@ -44,4 +44,4 @@ COPY --from=build /app/static ./static
 EXPOSE 8080
 
 # Start the server
-CMD ["./goth-todo"]
+CMD ["./web-scraper"]

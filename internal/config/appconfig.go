@@ -1,12 +1,12 @@
 package config
 
 import (
-	"goth-todo/internal/core/repository"
-	"goth-todo/internal/core/services"
-	"goth-todo/internal/handlers"
-	"goth-todo/internal/middleware"
 	"log"
 	"os"
+	"web-scraper/internal/core/handlers"
+	"web-scraper/internal/core/repository"
+	"web-scraper/internal/core/services"
+	"web-scraper/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"

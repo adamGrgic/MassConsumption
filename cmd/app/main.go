@@ -1,10 +1,10 @@
 package main
 
 import (
-	"goth-todo/internal/config"
-	"goth-todo/internal/db"
-	"goth-todo/internal/logging"
 	"os"
+	"web-scraper/internal/config"
+	"web-scraper/internal/db"
+	"web-scraper/internal/logging"
 
 	"github.com/joho/godotenv"
 )

@@ -5,12 +5,10 @@ import (
 	// "strings"
 
 	"context"
-	"goth-todo/internal/auth"
 	"net/http"
+	"web-scraper/internal/auth"
 
 	"github.com/gin-gonic/gin"
-
-	"goth-todo/internal/auth"
 
 	"github.com/golang-jwt/jwt/v5"
 )

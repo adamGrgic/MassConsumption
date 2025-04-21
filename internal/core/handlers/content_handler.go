@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	dashboard_vc "goth-todo/internal/components/dashboard"
-	layout_vc "goth-todo/internal/components/layout"
-	"goth-todo/internal/core/services"
+	dashboard_vc "web-scraper/internal/components/dashboard"
+	layout_vc "web-scraper/internal/components/layout"
+	"web-scraper/internal/core/services"
 
 	"github.com/gin-gonic/gin"
 )

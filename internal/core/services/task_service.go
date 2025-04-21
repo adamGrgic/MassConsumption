@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
-	"goth-todo/internal/core/models"
-	"goth-todo/internal/core/repository"
+	"web-scraper/internal/core/models"
+	"web-scraper/internal/core/repository"
 )
 
 type TaskService interface {
@@ -22,8 +22,9 @@ func NewTaskService(taskRepo repository.TaskRepository) TaskService {
 	}
 }
 
+// todo
 func (s *TaskServiceImpl) GetList(context context.Context) error {
-	return s.Repo
+	return s.Repo.GetList(context, 1)
 }
 
 func (s *TaskServiceImpl) GetTasks(context context.Context) ([]models.Task, error) {

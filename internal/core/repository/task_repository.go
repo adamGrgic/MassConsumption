@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"goth-todo/internal/core/models"
 	"strconv"
+	"web-scraper/internal/core/models"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,6 +32,7 @@ func (r *TaskRepository) GetList(ctx context.Context, id int) error {
 	}
 	defer rows.Close()
 
+	return nil
 }
 
 func (r *TaskRepository) GetTasks(ctx context.Context) ([]models.Task, error) {

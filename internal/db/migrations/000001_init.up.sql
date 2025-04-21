@@ -11,36 +11,15 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Create Table TaskItem
-CREATE TABLE IF NOT EXISTS taskitem (
+CREATE TABLE IF NOT EXISTS pricerecord (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT,
-    description TEXT,
-    statusid INT,
-    listid BIGINT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP
+    categoryid UUID,
+    price TEXT,
+    currencyid INT,
+    processid UUID,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
-
-CREATE TRIGGER set_updated_at_taskitem
-BEFORE UPDATE ON taskitem
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
-
--- Create Table TaskList
-CREATE TABLE IF NOT EXISTS tasklist (
-    id SERIAL PRIMARY KEY,
-    title TEXT,
-    description TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP
-);
-
-CREATE TRIGGER set_updated_at_tasklist
-BEFORE UPDATE ON taskitem
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
 
 -- Create Table Users
 CREATE TABLE IF NOT EXISTS users (
@@ -58,23 +37,50 @@ BEFORE UPDATE ON users
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
--- Create Table Accounts
-CREATE TABLE IF NOT EXISTS Accounts (
+-- Create Table Categories
+CREATE TABLE IF NOT EXISTS category (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT,
+    name TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMP
 );
 
-CREATE TRIGGER set_updated_at_accounts
-BEFORE UPDATE ON Accounts
+CREATE TRIGGER set_updated_at_category
+BEFORE UPDATE ON category
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
-
--- Create Table Statuses
-CREATE TABLE IF NOT EXISTS TaskStatus (
-    id SERIAL PRIMARY KEY,
-    name TEXT
+CREATE TABLE IF NOT EXISTS currencies (
+    code CHAR(3) PRIMARY KEY,          -- ISO 4217 currency code (e.g., USD, EUR)
+    name TEXT NOT NULL,                -- Currency name
+    symbol TEXT NOT NULL          -- Symbol (e.g., $, €, ¥)
 );
+
+
+CREATE TABLE IF NOT EXISTS importprocess (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP
+);
+
+CREATE TRIGGER set_updated_at_importprocess
+BEFORE UPDATE ON importprocess
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TABLE IF NOT EXISTS importentry (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    importlogid UUID,
+    success BIT,
+    error TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP
+);
+
+CREATE TRIGGER set_updated_at_importentry
+BEFORE UPDATE ON importentry
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();

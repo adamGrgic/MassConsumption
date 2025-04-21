@@ -1,3 +1,5 @@
+include .env
+export $(shell sed 's/=.*//' .env)
 MAKEFLAGS += --no-print-directory
 
 # MAIN
@@ -61,7 +63,6 @@ bundler-css-test:
 # Config
 MIGRATE_BIN=migrate
 MIGRATIONS_DIR=./internal/db/migrations
-DB_URL=postgres://postgres:psql@localhost:5432/goth-todo?sslmode=disable
 
 # Usage:
 # make migrate-create name=create_users_table
@@ -69,7 +70,8 @@ migrate-create:
 	$(MIGRATE_BIN) create -ext sql -dir $(MIGRATIONS_DIR) -seq $(name)
 
 migrate-up:
-	$(MIGRATE_BIN) -database "$(DB_URL)" -path $(MIGRATIONS_DIR) up
+	
+	$(MIGRATE_BIN) -database $(DB_URL) -path $(MIGRATIONS_DIR) up
 
 migrate-down:
 	$(MIGRATE_BIN) -database "$(DB_URL)" -path $(MIGRATIONS_DIR) down
@@ -91,10 +93,10 @@ migrate-seed:
 
 # DOCKER
 docker-build:
-	docker build -t goth-todo .
+	docker build -t web-scraper .
 
 docker-run:
-	docker run -p 8080:8080 goth-todo
+	docker run -p 8080:8080 web-scraper
 
 docker-dev:
 	docker compose up --build

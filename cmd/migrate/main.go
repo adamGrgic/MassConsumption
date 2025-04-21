@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"goth-todo/internal/db"
 	"log"
 	"os"
 	"path/filepath"
+	"web-scraper/internal/db"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

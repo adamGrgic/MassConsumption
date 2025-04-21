@@ -1,11 +1,11 @@
 package layout_vc
 
 import (
-	"goth-todo/internal/middleware"
-	"goth-todo/internal/media"
-	"goth-todo/internal/auth"
+	"web-scraper/internal/middleware"
+	"web-scraper/internal/media"
+	"web-scraper/internal/auth"
+	"web-scraper/internal/components/login"
 	"fmt"
-	"goth-todo/internal/components/login"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,40 +43,22 @@ templ HTML( model Model ) {
 	</head>
 	<body>
 		if token != nil {
-			// for now commenting out nav sub component
-			// if component gets more complex consider moving
-			// @nav()
-
-
-			// for reference
-			// href="/dashboard"
-			// hx-get="/dashboard"
-			// hx-target="#main-content"
-			// href="/user/logout"
-			// hx-get="/user/logout"
-			// hx-target="#main-content"
-			// href="/projects"
-			// hx-get="/projects"
-			// hx-target="#main-content"
 			<nav id="navbar" class="">
 				<div id="main-menu">
 					<a class=""
-					active="true"
-					
-					hx-push-url="true">
+						active="true"
+						hx-push-url="true">
 						Dashboard
 					</a>
 
 					<a class=""
-					
-					hx-push-url="true">
+						hx-push-url="true">
 						Task Lists
 					</a>
 				</div>
 				<div id="secondary-menu">
 					<a class=""
-					
-					hx-push-url="true">
+					    hx-push-url="true">
 						Logout
 					</a>
 				</div>

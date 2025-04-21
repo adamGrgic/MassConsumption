@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   # Your Go app
-  goth-todo:
+  web-scraper:
     build: .
     ports:
       - "8080:8080"
@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_PASSWORD=psql
-      - POSTGRES_DB=goth-todo
+      - POSTGRES_DB=web-scraper
     depends_on:
       - postgres
 

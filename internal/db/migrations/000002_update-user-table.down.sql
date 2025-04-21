@@ -1,4 +1,0 @@
-ALTER TABLE users
-ADD COLUMN name TEXT NOT NULL,
-DROP COLUMN first_name,
-DROP COLUMN last_name;

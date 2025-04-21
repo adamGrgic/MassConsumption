@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"goth-todo/internal/core/models"
+	"web-scraper/internal/core/models"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"

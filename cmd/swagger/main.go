@@ -1,7 +1,7 @@
 package main
 
 import (
-	swagger "goth-todo/docs"
+	swagger "web-scraper/docs"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

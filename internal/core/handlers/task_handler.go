@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
-	tasks_vc "goth-todo/internal/components/todos"
-	"goth-todo/internal/core/models"
-	"goth-todo/internal/core/services"
+	tasks_vc "web-scraper/internal/components/todos"
+	"web-scraper/internal/core/models"
+	"web-scraper/internal/core/services"
 
-	// "goth-todo/server/templates"
+	// "web-scraper/server/templates"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -36,8 +36,6 @@ func NewTaskHandler(taskService services.TaskService) *TaskHandler {
 
 func (h *TaskHandler) GetList(c *gin.Context) {
 	log.Info().Msg("GetList endpoint called")
-
-	ctx := context.Background()
 
 }
 

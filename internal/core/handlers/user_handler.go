@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"goth-todo/internal/auth"
-	login_vc "goth-todo/internal/components/login"
-	"goth-todo/internal/core/models"
-	"goth-todo/internal/core/services"
 	"net/http"
+	"web-scraper/internal/auth"
+	login_vc "web-scraper/internal/components/login"
+	"web-scraper/internal/core/models"
+	"web-scraper/internal/core/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
