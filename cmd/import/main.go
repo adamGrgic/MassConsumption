@@ -15,9 +15,9 @@ import (
 )
 
 type PriceResult struct {
-	Category string `json: "category"`
-	Price    string `json: "price"`
-	Title    string `json: "title"`
+	Category string `json:"category"`
+	Price    string `json:"price"`
+	Title    string `json:"title"`
 }
 
 var searchTerms = []string{"peanut butter", "banana", "nutella", "ground beef", "chicken", "eggs", ""}

@@ -1,5 +1,0 @@
-DROP TABLE IF EXISTS pricerecord;
-DROP TABLE IF EXISTS category;
-DROP TABLE IF EXISTS importprocess;
-DROP TABLE IF EXISTS importentry;
-DROP TABLE IF EXISTS currencies;

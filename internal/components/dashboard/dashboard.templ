@@ -4,7 +4,6 @@ import "github.com/gin-gonic/gin"
 
 import(
     "web-scraper/internal/media"
-    "web-scraper/internal/middleware"
 )
 
 type Model struct {
@@ -46,7 +45,6 @@ templ HTML(model Model) {
 
     <link rel="stylesheet" 
 		href={ media.GetCSSFile("dashboard")} 
-		nonce={middleware.GetCssNonce(model.Context)} 
 		hx-swap-oob="true">
 	</link>
 

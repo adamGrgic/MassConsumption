@@ -1,11 +1,7 @@
 package layout_vc
 
 import (
-	"web-scraper/internal/middleware"
 	"web-scraper/internal/media"
-	"web-scraper/internal/auth"
-	"web-scraper/internal/components/login"
-	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,60 +11,40 @@ type Model struct {
 	Component templ.Component
 }
 
-// templ nav() {
-// 	<nav id="navbar" class="">
-// 		<div class="container-fluid">
-// 			<a class="navbar-brand" href="#">Dashboard</a>
-// 			<a class="navbar-brand" href="#">Project Lists</a>
-// 			<!-- Rest of navbar -->
-// 		</div>
-// 	</nav>
-// }
-
 templ HTML( model Model ) {
-	
-	{{
-		token := auth.GetUserToken(model.Context)
-		fmt.Println("token retrieved in layout: ", token)
-	}}
-
 	<!DOCTYPE html>
 	<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<title>{ model.Title }</title>
-		<script src={ media.GetHTMX()} nonce={ middleware.GetHtmxNonce( model.Context ) }></script>
-        <script src={ media.GetHTMXResponseTargets() } nonce={ middleware.GetResponseTargetsNonce( model.Context ) }></script>
-		<link rel="stylesheet" href={ media.GetCSSFile("layout") } nonce={ middleware.GetCssNonce( model.Context ) }>
+		<script src={ media.GetHTMX()}></script>
+        <script src={ media.GetHTMXResponseTargets()}></script>
+		<link rel="stylesheet" href={ media.GetCSSFile("layout")}>
 	</head>
 	<body>
-		if token != nil {
-			<nav id="navbar" class="">
-				<div id="main-menu">
-					<a class=""
-						active="true"
-						hx-push-url="true">
-						Dashboard
-					</a>
+		<nav id="navbar" class="">
+			<div id="main-menu">
+				<a class=""
+					active="true"
+					hx-push-url="true">
+					Dashboard
+				</a>
 
-					<a class=""
-						hx-push-url="true">
-						Task Lists
-					</a>
-				</div>
-				<div id="secondary-menu">
-					<a class=""
-					    hx-push-url="true">
-						Logout
-					</a>
-				</div>
-			</nav>
-			<main id="#main-content">
-				@model.Component
-			</main>
-		} else {
-			@login_vc.HTML(login_vc.Model{ Context : model.Context})
-		}
+				<a class=""
+					hx-push-url="true">
+					Task Lists
+				</a>
+			</div>
+			<div id="secondary-menu">
+				<a class=""
+					hx-push-url="true">
+					Logout
+				</a>
+			</div>
+		</nav>
+		<main id="#main-content">
+			@model.Component
+		</main>
 
 		<footer>
 			// <div class="col-12 d-flex flex-row justify-content-center">
@@ -78,7 +54,7 @@ templ HTML( model Model ) {
 	</body>
 	</html>
 
-    <script src={media.GetJsFile("forms")} nonce={middleware.GetJsNonce(model.Context)}></script>
-    <script src={media.GetJsFile("nav")} nonce={middleware.GetJsNonce(model.Context)}></script>
+    <script src={media.GetJsFile("forms")}></script>
+    <script src={media.GetJsFile("nav")}></script>
 }
 
