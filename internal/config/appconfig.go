@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"web-scraper/internal/core/handlers"
+	"web-scraper/internal/core/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -31,9 +32,14 @@ func RunApp() *App {
 
 	// Initialize repositories
 
-	contentHandlers := handlers.NewContentHandlers()
+	priceService := services.NewPriceService()
 
-	r.GET("/", contentHandlers.GetDashboardPage)
+	contentHandlers := handlers.NewContentHandlers()
+	priceHandlers := handlers.NewPriceHandler(priceService)
+
+	r.GET("/", contentHandlers.GetLayout)
+
+	r.GET("/prices-table/get", priceHandlers.GetPrices)
 
 	return &App{
 		Router: r,

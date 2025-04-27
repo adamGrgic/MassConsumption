@@ -1,0 +1,38 @@
+package pricing_table_vc
+
+import(
+    "web-scraper/internal/core/models"
+    "web-scraper/internal/media"
+)
+
+type Model struct {
+    PriceRecords []models.PriceRecord
+}
+
+templ HTML(m Model) {
+    <table>
+        <thead>
+            <th>Price</th>
+            <th>Title</th>
+            <th>Category</th>
+        </thead>
+        <tbody>
+            for _, p := range m.PriceRecords {
+                <tr>
+                    <td>{p.Title}</td>
+                    <td>{p.Price}</td>
+                    <td>{p.Category}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+
+
+
+    <link rel="stylesheet" 
+		href={ media.GetCSSFile("price_table")} 
+		hx-swap-oob="true">
+	</link>
+}

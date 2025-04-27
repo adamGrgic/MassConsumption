@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	dashboard_vc "web-scraper/internal/components/dashboard"
 	layout_vc "web-scraper/internal/components/layout"
 	"web-scraper/internal/core/services"
 
@@ -16,21 +15,12 @@ func NewContentHandlers() *ContentHandlers {
 	return &ContentHandlers{}
 }
 
-// GetHomePage godoc
-// @Summary      Get Home page
-// @Description  Example of getting a parent component and a child component
-// @Produce      html
-// @Success      200 {string} string "HTML content"
-// @Router       / [get]
-func (h *ContentHandlers) GetDashboardPage(c *gin.Context) {
+func (h *ContentHandlers) GetLayout(c *gin.Context) {
 	c.Writer.Header().Set("Content-Type", "text/html")
 
-	dashboard_model := dashboard_vc.Model{Context: c}
-
 	model := layout_vc.Model{
-		Context:   c,
-		Title:     "Home",
-		Component: dashboard_vc.HTML(dashboard_model),
+		Context: c,
+		Title:   "Home",
 	}
 
 	layout_vc.HTML(model).Render(c.Request.Context(), c.Writer)

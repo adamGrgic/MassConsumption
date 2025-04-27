@@ -1,107 +1,128 @@
 package main
 
-// comment new foo
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
+	"web-scraper/internal/core/models"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/utils"
 )
 
-type PriceResult struct {
-	Category string `json:"category"`
-	Price    string `json:"price"`
-	Title    string `json:"title"`
-}
-
-var searchTerms = []string{"peanut butter", "banana", "nutella", "ground beef", "chicken", "eggs", ""}
+var searchTerms = []string{"peanut butter", "banana", "nutella", "ground beef", "chicken", "eggs"}
 
 func main() {
-	var priceResult []PriceResult
+	start := time.Now()
 
-	// Headless runs the browser on foreground, you can also use flag "-rod=show"
-	// Devtools opens the tab in each new tab opened automatically
-	l := launcher.New().
-		NoSandbox(true).
-		Headless(true).
-		Devtools(true)
-
-	defer l.Cleanup()
-
+	l := launcher.New().NoSandbox(true).Headless(true).Devtools(false)
 	url := l.MustLaunch()
 
-	// Trace shows verbose debug information for each action executed
-	// SlowMotion is a debug related function that waits 2 seconds between
-	// each action, making it easier to inspect what your code is doing.
-	browser := rod.New().
-		ControlURL(url).
-		Trace(true).
-		SlowMotion(2 * time.Second).
-		MustConnect()
-
-	// ServeMonitor plays screenshots of each tab. This feature is extremely
-	// useful when debugging with headless mode.
-	// You can also enable it with flag "-rod=monitor"
-	launcher.Open(browser.ServeMonitor(""))
-
+	browser := rod.New().ControlURL(url).MustConnect()
 	defer browser.MustClose()
 
+	var wg sync.WaitGroup
+	resultsChan := make(chan models.PriceRecord)
+	failChan := make(chan string, 1000)
+	// failChan := make(chan string)
+
 	for _, st := range searchTerms {
-		link := fmt.Sprintf("https://www.target.com/s?searchTerm=%s", strings.ReplaceAll(st, " ", "+"))
-		page := browser.MustPage(link)
+		wg.Add(1)
+		go func(searchTerm string) {
+			defer wg.Done()
 
-		time.Sleep(10 * time.Second)
+			incognito := browser.MustIncognito()
+			defer incognito.MustClose()
 
-		page.MustWaitIdle()
-		page.MustElement(`div[data-test="product-grid"]`)
+			link := fmt.Sprintf("https://www.target.com/s?searchTerm=%s", strings.ReplaceAll(searchTerm, " ", "+"))
+			page := incognito.MustPage(link)
 
-		elements := page.MustElements(`div[data-test="product-grid"] > *`)
+			page.MustWaitLoad()
+			page = page.Timeout(15 * time.Second)
+			page.MustElement(`div[data-test="product-grid"]`)
+			fmt.Println("after must element")
+			page.MustWaitIdle()
 
-		fmt.Println(elements)
+			elements := page.MustElements(`div[data-test="product-grid"] > *`)
 
-		if elements != nil {
-			for i, el := range elements {
-				titleEl, titleErr := el.Element(`div[data-test="product-title"]`)
-				if titleErr != nil {
-					fmt.Println("skipping invalid search result")
+			for _, el := range elements {
+				titleEl, err := el.Element(`div[data-test="product-title"]`)
+				if err != nil {
+					log.Err(err).Str("search term", st).Msg("Could not find title element for given search term.")
+					select {
+					case failChan <- searchTerm:
+					case <-time.After(5 * time.Second):
+						log.Warn().Str("search term", searchTerm).Msg("Timeout trying to send to failChan")
+					}
 					continue
 				}
 
-				priceEl, priceErr := el.Element(`span[data-test="current-price"]`)
-				if priceErr != nil {
-					fmt.Println("skipping invalid search result")
+				priceEl, err := el.Element(`span[data-test="current-price"]`)
+				if err != nil {
+					log.Err(err).Str("search term", st).Msg("Could not find title element for given search term.")
+					select {
+					case failChan <- searchTerm:
+					case <-time.After(5 * time.Second):
+						log.Warn().Str("search term", searchTerm).Msg("Timeout trying to send to failChan")
+					}
 					continue
-				}
-
-				if titleEl == nil || priceEl == nil {
-					continue // skip if it's not a valid product card
 				}
 
 				title := titleEl.MustText()
 				price := priceEl.MustText()
 
-				priceResult = append(priceResult, PriceResult{Title: title, Price: price, Category: st})
-
-				fmt.Printf("Item #%d: %s - %s\n", i+1, title, price)
+				resultsChan <- models.PriceRecord{Title: title, Price: price, Category: searchTerm}
 			}
-		}
-
-		fmt.Println("Final Price Result: ", priceResult)
-
-		finalData, err := json.MarshalIndent(priceResult, "", "  ")
-		if err != nil {
-			log.Panic("Could not marshal price data: ", err)
-		}
-
-		os.WriteFile("./tmp/prices.json", finalData, 0644)
-
+		}(st)
 	}
 
-	utils.Pause() // pause goroutine
+	go func() {
+		wg.Wait()
+		close(resultsChan)
+		close(failChan)
+	}()
+
+	var priceResult []models.PriceRecord
+	for r := range resultsChan {
+		priceResult = append(priceResult, r)
+	}
+
+	var failedSearches []string
+	for r := range failChan {
+		failedSearches = append(failedSearches, r)
+	}
+
+	if len(priceResult) == 0 {
+		log.Warn().Msg("No price records collected, skipping file write")
+		return
+	}
+
+	err := os.MkdirAll("./tmp", os.ModePerm)
+	if err != nil {
+		log.Panic().Err(err).Msg("failed to create tmp directory")
+	}
+
+	finalData, err := json.MarshalIndent(priceResult, "", "  ")
+	if err != nil {
+		log.Panic().Err(err).Msg("Could not marshal price data")
+	}
+
+	err = os.WriteFile("./tmp/prices.json", finalData, 0644)
+	if err != nil {
+		log.Err(err).Msg("Failed to write prices file")
+		return
+	}
+
+	fmt.Println("foo")
+
+	log.Info().
+		Int("record_count", len(priceResult)).
+		Dur("duration", time.Since(start)).
+		Msg("Scraping completed successfully")
+
 }

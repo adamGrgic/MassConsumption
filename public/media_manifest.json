@@ -7,5 +7,6 @@
   "js:todo": "public/scripts/bun/todo.3ee6107b.js",
   "response-targets": "public/scripts/htmx/response-targets.52c8a3be.js",
   "css:dashboard": "public/styles/dashboard.d41d8cd9.css",
-  "js:nav": "public/scripts/bun/nav.945fdf8e.js"
+  "js:nav": "public/scripts/bun/nav.945fdf8e.js",
+  "css:price_table": "public/styles/price_table.d41d8cd9.css"
 }

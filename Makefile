@@ -6,6 +6,9 @@ MAKEFLAGS += --no-print-directory
 run:
 	air
 
+import:
+	@go run ./cmd/import/main.go
+
 debug:
 	dlv debug ./cmd/app/main.go
 

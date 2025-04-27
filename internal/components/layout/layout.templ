@@ -8,7 +8,6 @@ import (
 type Model struct {
 	Context   *gin.Context
 	Title     string
-	Component templ.Component
 }
 
 templ HTML( model Model ) {
@@ -24,26 +23,21 @@ templ HTML( model Model ) {
 	<body>
 		<nav id="navbar" class="">
 			<div id="main-menu">
-				<a class=""
-					active="true"
-					hx-push-url="true">
-					Dashboard
-				</a>
-
-				<a class=""
-					hx-push-url="true">
-					Task Lists
-				</a>
+				// <a>
+				// 	Dashboard
+				// </a>
 			</div>
 			<div id="secondary-menu">
-				<a class=""
-					hx-push-url="true">
+				<a>
 					Logout
 				</a>
 			</div>
 		</nav>
-		<main id="#main-content">
-			@model.Component
+		<main id="main-content" 
+				hx-get="/prices-table/get"
+				hx-trigger="load"
+				hx-swap="innerHTML">
+			<p class="text-gray-400">Loading prices...</p>
 		</main>
 
 		<footer>
