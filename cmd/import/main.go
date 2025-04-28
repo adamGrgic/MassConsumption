@@ -18,7 +18,6 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
-	"github.com/go-rod/rod/lib/proto"
 )
 
 var searchTerms = []string{"peanut butter", "banana", "nutella", "ground beef", "chicken", "eggs"}
@@ -55,10 +54,6 @@ func main() {
 
 			link := fmt.Sprintf("https://www.target.com/s?searchTerm=%s", strings.ReplaceAll(searchTerm, " ", "+"))
 			page := incognito.MustPage(link)
-			page.MustSetUserAgent(&proto.NetworkSetUserAgentOverride{
-				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
-			})
-
 			_, err := page.HTML()
 			if err != nil {
 				log.Err(err).Msg("Could not get page HTML")

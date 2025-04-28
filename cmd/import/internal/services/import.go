@@ -21,8 +21,8 @@ func NewTransformer(success chan<- string, fail chan<- string, prices chan<- mod
 }
 
 func (r *Transformer) Process(ii contracts.ImportRequest) error {
-	elements := ii.RodPage.MustElements(`div[data-test="product-grid"] div[data-test="product-body"]`)
-
+	elements := ii.RodPage.MustElements(`div[data-test="product-grid"] div[data-test="product-details"] `)
+	// fmt.Println(elements)
 	if len(elements) == 0 {
 		log.Warn().Str("search term", ii.SearchTerm).Msg("Could not find element for given search term: ")
 		select {
@@ -31,51 +31,35 @@ func (r *Transformer) Process(ii contracts.ImportRequest) error {
 			log.Warn().Str("search term", ii.SearchTerm).Msg("Timeout trying to send to failChan")
 		}
 		return fmt.Errorf("no product grid elements found for search term: %s", ii.SearchTerm)
-	} else {
-		fmt.Println(elements.First().Element("div"))
 	}
 
-	// _, err := elements.First().Element(`div[data-test="product-title"]`)
-	// if err != nil {
-	// 	log.Warn().Str("search term", ii.SearchTerm).Msg("Could not find element for given search term: ")
-	// 	select {
-	// 	case r.FailChannel <- ii.SearchTerm:
-	// 	case <-time.After(5 * time.Second):
-	// 		log.Warn().Str("search term", ii.SearchTerm).Msg("Timeout trying to send to failChan")
-	// 	}
-	// 	return err
-	// }
+	_, err := elements.First().Element(`div[data-test="product-title"]`)
+	if err != nil {
+		log.Warn().Str("search term", ii.SearchTerm).Msg("Could not find element for given search term: ")
+		select {
+		case r.FailChannel <- ii.SearchTerm:
+		case <-time.After(5 * time.Second):
+			log.Warn().Str("search term", ii.SearchTerm).Msg("Timeout trying to send to failChan")
+		}
+		return err
+	}
 
 	for _, el := range elements {
 		titleEl, err := el.Element(`div[data-test="product-title"]`)
-		if err != nil {
-			log.Err(err).Msg("Couldn't get title element")
-			continue
-		}
-		priceEl, err := el.Element(`div[data-test="current-price"]`) // <-- small fix: you used wrong selector
-		if err != nil {
-			log.Err(err).Msg("Couldn't get price element")
+		if err != nil || titleEl == nil {
+			log.Err(err).Str("search term", ii.SearchTerm).Msg("Something went wrong getting the title for this search term, skipping...")
 			continue
 		}
 
-		// Now extract text safely
-		titleText, err := titleEl.Text()
-		if err != nil {
-			log.Err(err).Msg("Couldn't get title text")
+		priceEl, err := el.Element(`span[data-test="current-price"]`)
+		if err != nil || priceEl == nil {
 			continue
 		}
 
-		priceText, err := priceEl.Text()
-		if err != nil {
-			log.Err(err).Msg("Couldn't get price text")
-			continue
-		}
+		title := titleEl.MustText()
+		price := priceEl.MustText()
 
-		fmt.Println("Title:", titleText)
-		fmt.Println("Price:", priceText)
-
-		r.PricesChannel <- models.PriceRecord{Title: titleText, Price: priceText, Category: ii.SearchTerm}
-
+		r.PricesChannel <- models.PriceRecord{Title: title, Price: price, Category: ii.SearchTerm}
 	}
 
 	select {
