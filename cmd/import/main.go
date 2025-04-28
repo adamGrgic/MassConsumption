@@ -3,16 +3,22 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand/v2"
 	"os"
 	"strings"
 	"sync"
 	"time"
+	"web-scraper/cmd/import/internal/contracts"
+	"web-scraper/cmd/import/internal/services"
 	"web-scraper/internal/core/models"
+	"web-scraper/internal/logging"
 
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
+	"github.com/go-rod/rod/lib/proto"
 )
 
 var searchTerms = []string{"peanut butter", "banana", "nutella", "ground beef", "chicken", "eggs"}
@@ -20,16 +26,24 @@ var searchTerms = []string{"peanut butter", "banana", "nutella", "ground beef", 
 func main() {
 	start := time.Now()
 
+	godotenv.Load()
+
+	logging.ConfigureLogging()
+
 	l := launcher.New().NoSandbox(true).Headless(true).Devtools(false)
 	url := l.MustLaunch()
 
-	browser := rod.New().ControlURL(url).MustConnect()
+	browser := rod.New().SlowMotion(time.Duration(rand.IntN(100)) * time.Millisecond).ControlURL(url).MustConnect()
 	defer browser.MustClose()
 
 	var wg sync.WaitGroup
-	resultsChan := make(chan models.PriceRecord)
-	failChan := make(chan string, 1000)
-	// failChan := make(chan string)
+	pc := make(chan models.PriceRecord)
+	fc := make(chan string, 100)
+	sc := make(chan string, 100)
+
+	// retries := 5
+
+	t := services.NewTransformer(sc, fc, pc)
 
 	for _, st := range searchTerms {
 		wg.Add(1)
@@ -41,60 +55,45 @@ func main() {
 
 			link := fmt.Sprintf("https://www.target.com/s?searchTerm=%s", strings.ReplaceAll(searchTerm, " ", "+"))
 			page := incognito.MustPage(link)
+			page.MustSetUserAgent(&proto.NetworkSetUserAgentOverride{
+				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+			})
+
+			_, err := page.HTML()
+			if err != nil {
+				log.Err(err).Msg("Could not get page HTML")
+			}
 
 			page.MustWaitLoad()
 			page = page.Timeout(15 * time.Second)
 			page.MustElement(`div[data-test="product-grid"]`)
-			fmt.Println("after must element")
 			page.MustWaitIdle()
 
-			elements := page.MustElements(`div[data-test="product-grid"] > *`)
+			err = t.Process(contracts.ImportRequest{SearchTerm: searchTerm, RodPage: page})
 
-			for _, el := range elements {
-				titleEl, err := el.Element(`div[data-test="product-title"]`)
-				if err != nil {
-					log.Err(err).Str("search term", st).Msg("Could not find title element for given search term.")
-					select {
-					case failChan <- searchTerm:
-					case <-time.After(5 * time.Second):
-						log.Warn().Str("search term", searchTerm).Msg("Timeout trying to send to failChan")
-					}
-					continue
-				}
-
-				priceEl, err := el.Element(`span[data-test="current-price"]`)
-				if err != nil {
-					log.Err(err).Str("search term", st).Msg("Could not find title element for given search term.")
-					select {
-					case failChan <- searchTerm:
-					case <-time.After(5 * time.Second):
-						log.Warn().Str("search term", searchTerm).Msg("Timeout trying to send to failChan")
-					}
-					continue
-				}
-
-				title := titleEl.MustText()
-				price := priceEl.MustText()
-
-				resultsChan <- models.PriceRecord{Title: title, Price: price, Category: searchTerm}
-			}
 		}(st)
 	}
 
 	go func() {
 		wg.Wait()
-		close(resultsChan)
-		close(failChan)
+		close(sc)
+		close(fc)
+		close(pc)
 	}()
 
 	var priceResult []models.PriceRecord
-	for r := range resultsChan {
+	for r := range pc {
 		priceResult = append(priceResult, r)
 	}
 
 	var failedSearches []string
-	for r := range failChan {
-		failedSearches = append(failedSearches, r)
+	for f := range fc {
+		failedSearches = append(failedSearches, f)
+	}
+
+	var successSearches []string
+	for s := range sc {
+		successSearches = append(successSearches, s)
 	}
 
 	if len(priceResult) == 0 {
@@ -107,21 +106,21 @@ func main() {
 		log.Panic().Err(err).Msg("failed to create tmp directory")
 	}
 
-	finalData, err := json.MarshalIndent(priceResult, "", "  ")
+	fr, err := json.MarshalIndent(priceResult, "", "  ")
 	if err != nil {
 		log.Panic().Err(err).Msg("Could not marshal price data")
 	}
 
-	err = os.WriteFile("./tmp/prices.json", finalData, 0644)
+	err = os.WriteFile("./tmp/prices.json", fr, 0644)
 	if err != nil {
 		log.Err(err).Msg("Failed to write prices file")
 		return
 	}
 
-	fmt.Println("foo")
-
 	log.Info().
-		Int("record_count", len(priceResult)).
+		Int("imported prices", len(priceResult)).
+		Int("success count", len(successSearches)).
+		Int("failed count", len(failedSearches)).
 		Dur("duration", time.Since(start)).
 		Msg("Scraping completed successfully")
 
